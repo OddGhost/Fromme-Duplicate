@@ -1,0 +1,40 @@
+import cv2
+import numpy as np
+from PIL import Image
+
+# Load the video file
+cap = cv2.VideoCapture('path/to/video.mp4')
+
+# Get the total number of frames in the video
+num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+# Define the height and width of the output image
+height = 8000
+width = int(np.ceil(num_frames / height))
+
+# Initialize the output image
+output_image = np.zeros((height, width, 3))
+
+# Loop through each frame in the video
+for i in range(num_frames):
+    # Get the current frame
+    ret, frame = cap.read()
+    if ret:
+        # Get the average color of the frame
+        avg_color = np.mean(frame, axis=(0,1))
+        
+        # Convert the color to HEX
+        hex_color = '#{:02x}{:02x}{:02x}'.format(int(avg_color[2]), int(avg_color[1]), int(avg_color[0]))
+        
+        # Store the HEX color value in the output image
+        y = int(i / height)
+        x = i % height
+        output_image[x, y] = np.array(Image.new('RGB', (1, 1), hex_color)).reshape((3,))
+    else:
+        break
+
+# Resize the output image to the desired height and width
+output_image = cv2.resize(output_image, (height, width))
+
+# Save the output image
+cv2.imwrite('path/to/output.png', output_image)
